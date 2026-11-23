@@ -720,9 +720,10 @@ async function accountPage() {
       }
     };
 
-  // Referral section
-  if (me.referral?.code) {
-    const link = `https://tunevaconnect.top/app.html#signup?ref=${me.referral.code}`;
+  // Referral section – show for members once they have a code
+  const refCode = me?.referral?.code || null;
+  if (refCode) {
+    const link = `https://tunevaconnect.top/app.html#signup?ref=${refCode}`;
     const refCard = document.createElement("section");
     refCard.className = "panel glass";
     refCard.style.marginTop = "20px";
@@ -733,18 +734,22 @@ async function accountPage() {
       <div class="actions" style="margin-top:12px">
         <button class="button secondary small" id="copy-ref">Copy link</button>
       </div>
-      <div class="mini-item" style="margin-top:16px"><strong>People referred</strong> ${me.referral.count || 0}</div>
-      <div class="mini-item"><strong>Commission earned</strong> ${money(me.referral.earned || 0)}</div>
+      <div class="mini-item" style="margin-top:16px"><strong>People referred</strong> ${me.referral?.count || 0}</div>
+      <div class="mini-item"><strong>Commission earned</strong> ${money(me.referral?.earned || 0)}</div>
     `;
-    $("#view").appendChild(refCard);
-    $("#copy-ref").onclick = async () => {
-      try {
-        await navigator.clipboard.writeText(link);
-        toast("Referral link copied");
-      } catch {
-        toast("Copy failed. Select and copy the link manually.");
-      }
-    };
+    const view = $("#view");
+    if (view) view.appendChild(refCard);
+    const copyBtn = $("#copy-ref");
+    if (copyBtn) {
+      copyBtn.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(link);
+          toast("Referral link copied");
+        } catch {
+          toast("Copy failed. Select and copy the link manually.");
+        }
+      };
+    }
   }
 }
 async function authPage(mode, detail) {
@@ -1236,12 +1241,25 @@ async function adminPage(section = "overview") {
           body,
           emails,
         });
-        status.innerHTML = `<p class="notice success">Broadcast completed. ${result.accepted} accepted, ${result.failed} failed out of ${result.total}.</p>`;
+        let extra = "";
+        if (result.failed > 0 && result.lastError) {
+          const r = result.lastError;
+          if (r.reason === "configuration_missing") {
+            extra =
+              " Reason: BREVO_API_KEY or EMAIL_FROM is missing on the server.";
+          } else if (r.reason === "provider_rejected") {
+            extra = ` Reason: Brevo rejected the message (HTTP ${r.status || "?"} · ${r.code || "unknown"}). Check sender verification and credits in Brevo.`;
+          } else if (r.reason === "network_or_timeout") {
+            extra = " Reason: Network error or timeout reaching Brevo.";
+          } else {
+            extra = ` Reason: ${r.reason || "unknown"}`;
+          }
+        }
+        status.innerHTML = `<p class="notice ${result.failed === 0 ? "success" : "error"}">Broadcast finished. ${result.accepted} accepted, ${result.failed} failed out of ${result.total}.${extra}</p>`;
         toast(
           `Broadcast finished · ${result.accepted} sent, ${result.failed} failed`,
         );
-        // Refresh the section to show updated history
-        setTimeout(() => adminPage("broadcast"), 1200);
+        setTimeout(() => adminPage("broadcast"), 1500);
       } catch (err) {
         status.innerHTML = `<p class="notice error">${esc(err.message)}</p>`;
         toast(err.message);
