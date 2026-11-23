@@ -719,6 +719,33 @@ async function accountPage() {
         button.disabled = false;
       }
     };
+
+  // Referral section
+  if (me.referral?.code) {
+    const link = `https://tunevaconnect.top/app.html#signup?ref=${me.referral.code}`;
+    const refCard = document.createElement("section");
+    refCard.className = "panel glass";
+    refCard.style.marginTop = "20px";
+    refCard.innerHTML = `
+      <div class="section-title"><div><span class="eyebrow">INVITE & EARN</span><h2>Your referral link</h2></div></div>
+      <p class="subtle">Share this link. When someone joins and activates a plan, you earn <strong>50%</strong> of their activation fee.</p>
+      <div class="mini-item" style="word-break:break-all"><strong>${esc(link)}</strong></div>
+      <div class="actions" style="margin-top:12px">
+        <button class="button secondary small" id="copy-ref">Copy link</button>
+      </div>
+      <div class="mini-item" style="margin-top:16px"><strong>People referred</strong> ${me.referral.count || 0}</div>
+      <div class="mini-item"><strong>Commission earned</strong> ${money(me.referral.earned || 0)}</div>
+    `;
+    $("#view").appendChild(refCard);
+    $("#copy-ref").onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(link);
+        toast("Referral link copied");
+      } catch {
+        toast("Copy failed. Select and copy the link manually.");
+      }
+    };
+  }
 }
 async function authPage(mode, detail) {
   const signup = mode === "signup",
@@ -752,16 +779,36 @@ async function authPage(mode, detail) {
         ? "Choose a new password."
         : "Good to see you again.";
   $("#app").innerHTML =
-    `<div class="auth-wrap"><section class="auth-copy"><a class="brand" href="/"><span>T</span> tuneva.</a><span class="eyebrow">YOUR EVERYDAY POTENTIAL</span><h1>A little curiosity.<br>A world of<br><em>possibility.</em></h1><p>Join a community that makes room<br>for your knowledge, language and perspective.</p><div class="auth-art" aria-hidden="true">✳︎ ◒</div></section><section class="auth-card glass"><h2>${title}</h2><p>${signup ? "Create your account and choose your starting point." : forgot ? "Enter your email to request a password reset link." : reset ? "Use a unique password with at least 12 characters." : "Sign in to your TUNEVA workspace."}</p><form id="auth-form">${signup ? field("Full name", "name", "text", "", 'required autocomplete="name" minlength="2" maxlength="100"') : ""}${!reset ? field("Email address", "email", "email", "", 'required autocomplete="email" maxlength="254"') : ""}${signup ? field("Phone number", "phone", "tel", "", 'required autocomplete="tel" minlength="7" maxlength="24"') : ""}${!forgot ? field("Password", "password", "password", "", 'required minlength="12" maxlength="128" autocomplete="' + (signup || reset ? "new-password" : "current-password") + '"') : ""}${signup ? `<label class="field"><span>Choose your plan</span><select name="plan"><option value="pro" ${detail === "pro" ? "selected" : ""}>Pro · ₦9,000 activation</option><option value="max" ${detail === "max" ? "selected" : ""}>Max · ₦14,000 activation</option></select></label><p class="fine">Membership provides access to eligible funded tasks. Rewards vary by task; completing signup does not generate earnings.</p>` : ""}${status()}<button type="submit" class="button">${signup ? 'Create account <span class="arrow" aria-hidden="true"></span>' : forgot ? "Send reset link" : reset ? "Update password" : 'Sign in <span class="arrow" aria-hidden="true"></span>'}</button></form><p class="auth-bottom">${signup ? 'Already a member? <a href="#login">Sign in</a>' : forgot || reset ? '<a href="#login">Back to sign in</a>' : 'New here? <a href="#signup">Create an account</a><br><br><a href="#forgot">Forgot your password?</a>'}</p>${config.demo && !signup && !forgot && !reset ? '<div class="demo-accounts">Try the demo · no real payments or money.<br><button data-demo="member">Use member account</button> · <button data-demo="admin">Use admin account</button><br>Password: TunevaDemo2026!</div>' : ""}</section></div>`;
+    `<div class="auth-wrap"><section class="auth-copy"><a class="brand" href="/"><span>T</span> tuneva.</a><span class="eyebrow">YOUR EVERYDAY POTENTIAL</span><h1>A little curiosity.<br>A world of<br><em>possibility.</em></h1><p>Join a community that makes room<br>for your knowledge, language and perspective.</p><div class="auth-art" aria-hidden="true">✳︎ ◒</div></section><section class="auth-card glass"><h2>${title}</h2><p>${signup ? "Create your account and choose your starting point." : forgot ? "Enter your email to request a password reset link." : reset ? "Use a unique password with at least 12 characters." : "Sign in to your TUNEVA workspace."}</p><form id="auth-form">${signup ? field("Full name", "name", "text", "", 'required autocomplete="name" minlength="2" maxlength="100"') : ""}${!reset ? field("Email address", "email", "email", "", 'required autocomplete="email" maxlength="254"') : ""}${signup ? field("Phone number", "phone", "tel", "", 'required autocomplete="tel" minlength="7" maxlength="24"') : ""}${!forgot ? field("Password", "password", "password", "", 'required minlength="12" maxlength="128" autocomplete="' + (signup || reset ? "new-password" : "current-password") + '"') : ""}${signup ? `<div class="field plan-chooser"><span>Choose your plan</span><button type="button" class="button secondary full" id="plan-toggle" style="margin-top:8px">Select a membership plan</button><div id="plan-options" style="display:none;margin-top:14px;gap:12px;flex-direction:column"><label class="plan-card" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid #e5e0f0;border-radius:14px;cursor:pointer"><input type="radio" name="plan" value="pro" ${detail === "pro" ? "checked" : ""} required style="accent-color:#6d28d9"><div><strong>Pro</strong> · ₦9,000 activation</div></label><label class="plan-card recommended" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border:2px solid #6d28d9;border-radius:14px;cursor:pointer;background:#f8f5ff;position:relative"><input type="radio" name="plan" value="max" ${detail === "max" || !detail ? "checked" : ""} required style="accent-color:#6d28d9"><div><span style="font-size:11px;font-weight:700;color:#6d28d9;text-transform:uppercase;letter-spacing:.04em">Recommended</span><br><strong>Max</strong> · ₦14,000 activation</div></label></div><p class="fine">Membership provides access to eligible funded tasks. Rewards vary by task; completing signup does not generate earnings.</p></div>` : ""}
+${status()}<button type="submit" class="button">${signup ? 'Create account <span class="arrow" aria-hidden="true"></span>' : forgot ? "Send reset link" : reset ? "Update password" : 'Sign in <span class="arrow" aria-hidden="true"></span>'}</button></form><p class="auth-bottom">${signup ? 'Already a member? <a href="#login">Sign in</a>' : forgot || reset ? '<a href="#login">Back to sign in</a>' : 'New here? <a href="#signup">Create an account</a><br><br><a href="#forgot">Forgot your password?</a>'}</p>${config.demo && !signup && !forgot && !reset ? '<div class="demo-accounts">Try the demo · no real payments or money.<br><button data-demo="member">Use member account</button> · <button data-demo="admin">Use admin account</button><br>Password: TunevaDemo2026!</div>' : ""}</section></div>`;
   for (const b of $$("[data-demo]"))
     b.onclick = () => {
       $("[name=email]").value = b.dataset.demo + "@tuneva.demo";
       $("[name=password]").value = "TunevaDemo2026!";
     };
+  const planToggle = $("#plan-toggle");
+  const planOptions = $("#plan-options");
+  if (planToggle && planOptions) {
+    planToggle.onclick = () => {
+      planOptions.style.display = planOptions.style.display === "none" ? "flex" : "none";
+      planToggle.textContent = planOptions.style.display === "none" ? "Select a membership plan" : "Hide plans";
+    };
+  }
   bindForm("#auth-form", async (data) => {
+    let referral_code = null;
+    if (signup) {
+      try {
+        const params = new URLSearchParams(location.search);
+        referral_code =
+          params.get("ref") || localStorage.getItem("tuneva_ref") || null;
+        if (params.get("ref"))
+          localStorage.setItem("tuneva_ref", params.get("ref"));
+      } catch {}
+    }
     const result = await api("/auth/" + mode, {
       ...data,
       ...(reset ? { token: detail } : {}),
+      ...(signup && referral_code ? { referral_code } : {}),
     });
     if (forgot) {
       $(".form-status").textContent = result.message;
@@ -1113,6 +1160,12 @@ async function adminPage(section = "overview") {
               <div id="broadcast-status"></div>
               <button class="button" type="submit">Send broadcast</button>
             </form>
+            <div class="notice" style="margin-top:16px">
+              <strong>If sending fails:</strong> Check Admin → System for email status. 
+              Make sure BREVO_API_KEY and EMAIL_FROM are set correctly on Render, 
+              and that the sender address is verified in your Brevo account. 
+              Always test first with a Custom list containing only your own email.
+            </div>
           </section>
         </div>
         <aside class="secondary-column">
