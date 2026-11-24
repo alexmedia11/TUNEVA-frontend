@@ -1687,3 +1687,232 @@ dialog::backdrop {
   .auth-card { margin: auto; }
   .admin-metrics { gap: 10px; }
 }
+
+/* TUNEVA business identity refresh — member and admin workspace */
+:root {
+  --bg: #f6f1e7;
+  --ink: #17251e;
+  --muted: #68756d;
+  --purple: #e8e0c9;
+  --purple-dark: #b58a36;
+  --line: #e6ddca;
+  --glass: #fffdf8;
+  --radius: 14px;
+  --shadow: 0 8px 28px rgba(24, 49, 36, .055);
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+}
+body {
+  color: var(--ink);
+  background: #f6f1e7;
+  font-size: 14px;
+}
+h1, h2, h3, .balance-amount, .stat-value, .plan-price {
+  font-family: "Playfair Display", Georgia, serif;
+  letter-spacing: -.025em;
+}
+h1 { font-size: clamp(30px, 3vw, 42px); line-height: 1.12; }
+h2 { font-size: 23px; }
+.glass, .panel {
+  background: #fffdf8;
+  border: 1px solid #e8dfce;
+  box-shadow: 0 8px 28px rgba(24,49,36,.045);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-radius: 14px;
+}
+.sidebar {
+  background: #103b2b;
+  color: #f8f3e8;
+  border-right: 0;
+  padding: 26px 15px 18px;
+}
+.sidebar .brand {
+  color: #fffaf0;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: .16em;
+  margin: 0 12px 30px;
+}
+.brand-period { color: #d8ae55; }
+.workspace-chip {
+  border: 1px solid rgba(231,197,123,.25);
+  border-radius: 10px;
+  background: rgba(255,255,255,.06);
+  color: #fff8e8;
+}
+.workspace-chip > .ui-icon { color: #d8ae55; }
+.workspace-chip small, .nav-label { color: #c4d1c8; }
+.nav-link { color: #d8e0d9; border-radius: 8px; }
+.nav-link:hover { background: rgba(255,255,255,.09); color: #fff; }
+.nav-link.active {
+  color: #173c2c;
+  background: #d7b45f;
+  font-weight: 750;
+}
+.nav-current { background: #173c2c; }
+.profile-mini { color: #fff8e8; }
+.profile-mini small { color: #c4d1c8; }
+.avatar { background: #d8b45f; color: #183b2b; }
+.main { background: #f6f1e7; }
+.topbar {
+  background: rgba(255,253,248,.96);
+  border-bottom: 1px solid #e8dfce;
+}
+.breadcrumb, .top-date { color: #718076; }
+.pill { border-radius: 5px; }
+.purple { color: #6c5421; background: #f2e8cc; }
+.green { color: #17613d; background: #e4efe5; }
+.amber { color: #815d18; background: #f7edcf; }
+.red { color: #9a3c3c; background: #f7e7e3; }
+.button {
+  border: 1px solid #103b2b;
+  border-radius: 7px;
+  background: #103b2b;
+  color: #fffdf8;
+  font-size: 12px;
+  font-weight: 700;
+  min-height: 44px;
+  padding: 12px 18px;
+}
+.button:hover { background: #1b543d; border-color: #1b543d; }
+.button.secondary {
+  color: #183b2b;
+  background: #fffdf8;
+  border-color: #d9cfbc;
+}
+.button.secondary:hover { background: #f1eadb; }
+.button.light { color: #173c2c; background: #f1d58c; border-color: #f1d58c; }
+.text-link, .auth-bottom a { color: #1b6544; }
+.eyebrow { color: #8b7545; letter-spacing: .13em; }
+.page-heading { margin-bottom: 24px; }
+.page-heading h1 { color: #17251e; }
+.page-heading p, .subtle { color: #68756d; }
+.overview-metrics { gap: 13px; }
+.balance-feature {
+  background: #103b2b;
+  color: #fffaf0;
+  border: 1px solid #103b2b;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(16,59,43,.13);
+}
+.balance-feature .balance-amount { color: #fffaf0; font-size: clamp(28px, 3vw, 38px); }
+.balance-feature .balance-foot, .balance-feature .balance-foot a { color: #e5d7b5; }
+.stat { border-radius: 14px; background: #fffdf8; border-color: #e8dfce; }
+.stat-icon { color: #1c5b3e; background: #eaf0e8; border-radius: 9px; }
+.stat-value { color: #183b2b; font-size: 27px; }
+.chart-panel, .membership-card, .bank-preview, .task-card { border-radius: 14px; }
+.membership-card {
+  background: #173f2f;
+  color: #fffaf0;
+  border: 1px solid #173f2f;
+}
+.membership-card p, .membership-card .eyebrow { color: #e0d6bc; }
+.membership-card .text-link { color: #f1d58c; }
+.task-card { background: #fffdf8; border: 1px solid #e7decd; box-shadow: 0 7px 20px rgba(24,49,36,.04); }
+.task-card h3 { color: #17251e; }
+.task-symbol { border-radius: 8px; background: #edf1e8; color: #1d5a3e; }
+.task-bottom strong { color: #173f2f; }
+.activity-row { border-bottom-color: #eee7da; }
+.activity-icon { background: #eaf0e8; color: #1d5a3e; border-radius: 8px; }
+.filter, .period-label { border-radius: 6px; }
+.filter.active { background: #103b2b; color: #fffdf8; border-color: #103b2b; }
+.table { background: #fffdf8; }
+.table th { color: #6d786f; background: #f4eee2; }
+.table td, .table th { border-bottom-color: #e9e1d3; }
+.notice { background: #f5edd8; border-color: #e8d7a8; color: #695321; }
+.error { color: #a34040; }
+.workspace-footer { color: #829087; border-top-color: #e6ddca; }
+.mobile-dock { background: #103b2b; border-top: 1px solid rgba(255,255,255,.1); }
+.mobile-dock .nav-link { color: #e4e9e3; }
+.mobile-dock .nav-link.active { color: #173c2c; background: #d7b45f; }
+
+/* Signup and sign-in: confident, editorial and business-like */
+.auth-wrap {
+  min-height: 100svh;
+  padding: clamp(22px, 5vw, 70px);
+  gap: clamp(28px, 7vw, 100px);
+  background: #f6f1e7;
+}
+.auth-copy { max-width: 510px; }
+.auth-copy .brand {
+  display: inline-block;
+  color: #103b2b;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: .16em;
+  margin-bottom: 54px;
+}
+.auth-copy h1 { color: #17251e; font-size: clamp(42px, 5vw, 66px); line-height: 1.03; }
+.auth-copy h1 em { color: #a77b2d; }
+.auth-copy > p { color: #68756d; max-width: 410px; font-size: 15px; }
+.auth-proof {
+  max-width: 430px;
+  margin-top: 48px;
+  padding: 25px 0 0;
+  border-top: 1px solid #dfd4bf;
+}
+.auth-proof > span { color: #8b7545; font-size: 10px; font-weight: 800; letter-spacing: .15em; }
+.auth-proof strong { display: block; margin-top: 13px; color: #173f2f; font: 600 25px/1.25 "Playfair Display", Georgia, serif; }
+.auth-proof p { color: #68756d; font-size: 13px; max-width: 380px; }
+.auth-proof-rule { display: flex; gap: 7px; margin-top: 22px; }
+.auth-proof-rule i { display: block; width: 34px; height: 4px; background: #d2ad5b; border-radius: 3px; }
+.auth-proof-rule i:nth-child(2) { width: 18px; background: #9aab91; }
+.auth-proof-rule i:nth-child(3) { width: 9px; background: #103b2b; }
+.auth-card {
+  width: min(100%, 500px);
+  padding: clamp(25px, 4vw, 43px);
+  border: 1px solid #e6ddca;
+  border-radius: 13px;
+  background: #fffdf8;
+  box-shadow: 0 18px 55px rgba(24,49,36,.08);
+}
+.auth-card h2 { color: #17251e; font: 600 clamp(28px, 3vw, 35px)/1.15 "Playfair Display", Georgia, serif; }
+.auth-card > p { color: #68756d; }
+.auth-card .field { margin-top: 17px; }
+.auth-card .field > span { color: #35483d; font-size: 12px; font-weight: 700; }
+.auth-card .field input, .auth-card .field select {
+  min-height: 49px;
+  border: 1px solid #ded7c8;
+  border-radius: 7px;
+  background: #fffefa;
+  color: #17251e;
+}
+.auth-card .field input:focus, .auth-card .field select:focus { border-color: #a77b2d; outline: 3px solid rgba(215,180,95,.18); }
+.auth-card .button[type="submit"] { width: 100%; margin-top: 15px; }
+.auth-bottom { color: #68756d; text-align: center; margin: 22px 0 0; }
+.auth-bottom a { font-weight: 800; }
+.plan-chooser { margin-top: 22px !important; }
+#plan-toggle { min-height: 49px; border-radius: 7px; justify-content: space-between; }
+#plan-options { display: flex; }
+.plan-card {
+  min-height: 76px;
+  border-radius: 9px !important;
+  background: #fffefa !important;
+  border: 1px solid #e3dac8 !important;
+  transition: border-color .18s, box-shadow .18s;
+}
+.plan-card:hover { border-color: #9a7b3e !important; }
+.plan-card.recommended {
+  background: #f8f3e6 !important;
+  border: 2px solid #b58a36 !important;
+  box-shadow: 0 7px 18px rgba(121,91,35,.08);
+}
+.plan-card.recommended::after {
+  content: "RECOMMENDED";
+  color: #6b501d;
+  background: #f0dfb4;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .07em;
+}
+.plan-card input { accent-color: #103b2b !important; }
+#toast { background: #103b2b; }
+@media (max-width: 760px) {
+  .auth-wrap { padding: 20px 15px; }
+  .auth-copy { display: none; }
+  .auth-card { margin: auto; }
+  .shell { grid-template-columns: minmax(0,1fr); }
+  .topbar { background: #fffdf8; }
+}

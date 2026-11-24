@@ -2867,3 +2867,28 @@ body.tuneva-home .site-footer > a:last-child {
     animation-duration: .01ms !important;
   }
 }
+
+/* TUNEVA brand system: forest green, warm ivory and restrained brass */
+:root {
+  --home-ink: #103b2b;
+  --home-gold: #b58a36;
+  --home-gold-dark: #8e6b2c;
+  --home-paper: #f6f1e7;
+}
+body.tuneva-home { background: #f6f1e7; color: #17251e; }
+body.tuneva-home .site-header { background: rgba(255,253,248,.96); }
+body.tuneva-home .wordmark { color: #103b2b; letter-spacing: .12em; font-size: 21px; }
+body.tuneva-home .wordmark .bolt { display: none; }
+body.tuneva-home .brand-dot { color: #b58a36; }
+body.tuneva-home .nav-cta { background: #103b2b; border-radius: 6px; }
+body.tuneva-home .nav-cta:hover { background: #1b543d; }
+body.tuneva-home .button-gold { background: #b58a36; border-color: #b58a36; border-radius: 6px; }
+body.tuneva-home .button-gold:hover { background: #8e6b2c; border-color: #8e6b2c; }
+body.tuneva-home .new-hero h1, body.tuneva-home h2, body.tuneva-home h3 { color: #17251e; }
+body.tuneva-home .new-hero h1 em, body.tuneva-home h2 em { color: #9b742e; }
+body.tuneva-home .feature, body.tuneva-home .video-card { border-color: #e5dccb; }
+body.tuneva-home .ribbon { background: #eee7d9; color: #244333; border-top: 1px solid #e2d7c4; border-bottom: 1px solid #e2d7c4; }
+body.tuneva-home .statement { background: #f1eadc; color: #26382e; border-top: 1px solid #e5dccb; border-bottom: 1px solid #e5dccb; }
+body.tuneva-home .statement h2 { color: #17251e; }
+body.tuneva-home .statement h2 em { color: #9b742e; }
+body.tuneva-home .text-link { color: #1b6544; }
