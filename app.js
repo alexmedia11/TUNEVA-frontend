@@ -1166,7 +1166,12 @@ async function adminPage(section = "overview") {
                 <span>Message</span>
                 <textarea name="body" rows="10" required minlength="10" maxlength="8000" placeholder="Write your message here..."></textarea>
               </label>
-              <p class="fine">Plain text is recommended. A simple branded HTML wrapper is applied automatically.</p>
+              <div class="field">
+                <span>Photo attachment <span class="fine">(optional · JPG, PNG, WebP · max 2 MB)</span></span>
+                <input id="broadcast-image" type="file" accept="image/jpeg,image/png,image/webp">
+                <div id="broadcast-image-preview" class="fine" aria-live="polite" style="margin-top:10px"></div>
+              </div>
+              <p class="fine">Your photo will be included as a downloadable attachment. A simple branded HTML wrapper is applied automatically.</p>
               <div id="broadcast-status"></div>
               <button class="button" type="submit">Send broadcast</button>
             </form>
@@ -1212,6 +1217,56 @@ async function adminPage(section = "overview") {
         audienceSelect.value === "custom" ? "block" : "none";
     });
 
+    const imageInput = $("#broadcast-image");
+    const imagePreview = $("#broadcast-image-preview");
+    let broadcastImage = null;
+    imageInput.addEventListener("change", () => {
+      const file = imageInput.files?.[0];
+      broadcastImage = null;
+      imagePreview.replaceChildren();
+      if (!file) return;
+      const allowed = ["image/jpeg", "image/png", "image/webp"];
+      if (!allowed.includes(file.type)) {
+        imageInput.value = "";
+        toast("Choose a JPG, PNG or WebP image.");
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        imageInput.value = "";
+        toast("The image must be 2 MB or smaller.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        broadcastImage = {
+          name: file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 100) || "photo",
+          type: file.type,
+          data: String(reader.result || ""),
+        };
+        const preview = document.createElement("div");
+        preview.style.cssText = "display:flex;align-items:center;gap:12px;flex-wrap:wrap";
+        const img = document.createElement("img");
+        img.src = broadcastImage.data;
+        img.alt = "Selected email attachment preview";
+        img.style.cssText = "width:88px;height:72px;object-fit:cover;border-radius:8px";
+        const info = document.createElement("span");
+        info.textContent = `${file.name} · ${(file.size / 1024).toFixed(0)} KB`;
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "button secondary";
+        remove.textContent = "Remove photo";
+        remove.addEventListener("click", () => {
+          broadcastImage = null;
+          imageInput.value = "";
+          imagePreview.replaceChildren();
+        });
+        preview.append(img, info, remove);
+        imagePreview.replaceChildren(preview);
+      };
+      reader.onerror = () => toast("Could not read that image. Please try another.");
+      reader.readAsDataURL(file);
+    });
+
     $("#broadcast-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const form = e.target;
@@ -1245,6 +1300,7 @@ async function adminPage(section = "overview") {
           subject,
           body,
           emails,
+          attachment: broadcastImage,
         });
         let extra = "";
         if (result.failed > 0 && result.lastError) {
