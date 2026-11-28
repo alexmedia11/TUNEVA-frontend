@@ -1916,3 +1916,16 @@ h2 { font-size: 23px; }
   .shell { grid-template-columns: minmax(0,1fr); }
   .topbar { background: #fffdf8; }
 }
+
+/* Inline rich-content editor and rendered content */
+.rich-field { display:block; }
+.rich-toolbar { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0; }
+.rich-toolbar button { border:1px solid var(--line, #d9dce5); border-radius:9px; background:var(--surface, #fff); color:inherit; padding:8px 12px; cursor:pointer; }
+.rich-editor { min-height:190px; padding:14px; border:1px solid var(--line, #d9dce5); border-radius:12px; background:var(--surface, #fff); color:inherit; line-height:1.65; outline:none; overflow-wrap:anywhere; }
+.rich-editor:focus { border-color:var(--accent, #6d28d9); box-shadow:0 0 0 3px rgba(109,40,217,.10); }
+.rich-editor:empty:before { content:attr(data-placeholder); color:#9296a3; pointer-events:none; }
+.rich-editor img, .rich-content img { display:block; max-width:100%; height:auto; margin:14px auto; border-radius:12px; }
+.rich-content { line-height:1.7; overflow-wrap:anywhere; }
+.rich-content p { margin:0 0 12px; }
+.rich-content ul, .rich-content ol { padding-left:24px; }
+.rich-content a { color:var(--accent, #6d28d9); text-decoration:underline; }

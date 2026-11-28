@@ -90,6 +90,68 @@ function field(label, name, type = "text", value = "", extra = "") {
 function area(label, name, extra = "") {
   return `<label class="field"><span>${label}</span><textarea name="${name}" ${extra}></textarea></label>`;
 }
+function richArea(label, name, placeholder = "Write your content here...") {
+  const id = `rich-${name}`;
+  return `<div class="field rich-field"><span>${label}</span><div class="rich-toolbar" role="toolbar" aria-label="Content formatting">
+    <button type="button" data-rich-command="bold" title="Bold"><b>B</b></button>
+    <button type="button" data-rich-command="italic" title="Italic"><i>I</i></button>
+    <button type="button" data-rich-command="insertUnorderedList" title="Bulleted list">• List</button>
+    <button type="button" data-rich-image title="Insert image by URL">＋ Image URL</button>
+  </div><div id="${id}" class="rich-editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="${esc(placeholder)}"></div><textarea class="rich-value" name="${name}" hidden></textarea><small class="fine">Write normally, then place your cursor where the image should appear. Use a public HTTPS image URL.</small></div>`;
+}
+function bindRichEditors(root = document) {
+  $$(".rich-editor", root).forEach(editor => {
+    if (editor.dataset.bound) return;
+    editor.dataset.bound = "1";
+    const field = editor.closest(".rich-field");
+    const hidden = $(".rich-value", field);
+    const sync = () => { hidden.value = editor.innerHTML; };
+    editor.addEventListener("input", sync);
+    field.querySelectorAll("[data-rich-command]").forEach(button => button.addEventListener("click", () => {
+      editor.focus(); document.execCommand(button.dataset.richCommand, false); sync();
+    }));
+    $("[data-rich-image]", field).addEventListener("click", () => {
+      const raw = window.prompt("Paste a public HTTPS image URL:");
+      if (!raw) return;
+      let url;
+      try { url = new URL(raw.trim()); } catch { toast("Enter a valid image URL."); return; }
+      if (url.protocol !== "https:") { toast("Image URLs must use HTTPS."); return; }
+      editor.focus();
+      const image = document.createElement("img");
+      image.src = url.href; image.alt = ""; image.loading = "lazy";
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount && editor.contains(selection.anchorNode)) {
+        const range = selection.getRangeAt(0); range.deleteContents(); range.insertNode(image);
+        range.setStartAfter(image); range.collapse(true); selection.removeAllRanges(); selection.addRange(range);
+      } else editor.append(image);
+      editor.append(document.createElement("p")); sync();
+    });
+    sync();
+  });
+}
+function richHTML(value) {
+  const doc = new DOMParser().parseFromString(String(value || ""), "text/html");
+  const allowed = new Set(["P","BR","STRONG","B","EM","I","U","UL","OL","LI","BLOCKQUOTE","H2","H3","A","IMG"]);
+  const clean = node => {
+    [...node.childNodes].forEach(child => {
+      if (child.nodeType === 1) {
+        if (!allowed.has(child.tagName)) { child.replaceWith(...child.childNodes); return; }
+        const original = child.getAttribute("src") || child.getAttribute("href");
+        [...child.attributes].forEach(attr => child.removeAttribute(attr.name));
+        if (child.tagName === "IMG" || child.tagName === "A") {
+          try { const url = new URL(original); if (url.protocol !== "https:") throw Error(); child.setAttribute(child.tagName === "IMG" ? "src" : "href", url.href); }
+          catch { child.remove(); return; }
+          if (child.tagName === "IMG") { child.alt = ""; child.loading = "lazy"; }
+          else { child.target = "_blank"; child.rel = "noopener noreferrer"; }
+        }
+        clean(child);
+      }
+    });
+  };
+  clean(doc.body);
+  return doc.body.innerHTML;
+}
+function richPlain(value) { const el = document.createElement("div"); el.innerHTML = richHTML(value); return (el.textContent || "").trim(); }
 function status() {
   return '<p class="error form-status" role="status"></p>';
 }
@@ -272,7 +334,7 @@ function taskCard(t) {
   const k = kinds[t.type],
     reward = t[me.user.plan + "_reward"];
   const complete = t.attempt_status && t.attempt_status !== "started";
-  return `<article class="task-card glass"><div class="row"><span class="task-symbol ${k.color}">${k.icon}</span>${t.attempt_status ? badge(t.attempt_status) : '<span class="pill">' + (t.source === "advertiser" ? "SPONSORED" : "COMMUNITY") + "</span>"}</div><div class="task-category">${k.name.toUpperCase()}</div><h3>${esc(t.title)}</h3><p>${esc(t.description.slice(0, 150))}${t.description.length > 150 ? "…" : ""}</p><div class="task-bottom"><strong>${money(reward)}<small>${esc(t.sponsor)}</small></strong><button class="button secondary task-open" data-id="${t.id}" ${!reward || complete ? "disabled" : ""}>${complete ? "Submitted" : t.attempt_status === "started" ? 'Continue <span class="arrow" aria-hidden="true"></span>' : 'Start task <span class="arrow" aria-hidden="true"></span>'}</button></div></article>`;
+  return `<article class="task-card glass"><div class="row"><span class="task-symbol ${k.color}">${k.icon}</span>${t.attempt_status ? badge(t.attempt_status) : '<span class="pill">' + (t.source === "advertiser" ? "SPONSORED" : "COMMUNITY") + "</span>"}</div><div class="task-category">${k.name.toUpperCase()}</div><h3>${esc(t.title)}</h3><p>${esc(richPlain(t.description).slice(0, 150))}${richPlain(t.description).length > 150 ? "…" : ""}</p><div class="task-bottom"><strong>${money(reward)}<small>${esc(t.sponsor)}</small></strong><button class="button secondary task-open" data-id="${t.id}" ${!reward || complete ? "disabled" : ""}>${complete ? "Submitted" : t.attempt_status === "started" ? 'Continue <span class="arrow" aria-hidden="true"></span>' : 'Start task <span class="arrow" aria-hidden="true"></span>'}</button></div></article>`;
 }
 function bindTasks() {
   for (const b of $$(".task-open")) b.onclick = () => startTask(b.dataset.id);
@@ -357,7 +419,7 @@ async function startTask(taskId) {
       return;
     }
     const c = a.config;
-    let content = `<p class="modal-note">${esc(a.description || "")}</p><p class="modal-note">Reward: <strong>${money(a.reward)}</strong> · Finish by ${new Date(a.expires).toLocaleString()}. Your reward is reserved while you work.</p><form id="task-form">`;
+    let content = `<div class="rich-content task-instructions">${richHTML(a.description || "")}</div><p class="modal-note">Reward: <strong>${money(a.reward)}</strong> · Finish by ${new Date(a.expires).toLocaleString()}. Your reward is reserved while you work.</p><form id="task-form">`;
     if (a.type === "quiz")
       content +=
         `<p class="modal-note">Pass mark: ${c.pass}%. Check your answers before submitting; this is your only attempt.</p>` +
@@ -1162,10 +1224,7 @@ async function adminPage(section = "overview") {
                 <span>Subject</span>
                 <input name="subject" type="text" required minlength="3" maxlength="180" placeholder="Important update from TUNEVA">
               </label>
-              <label class="field">
-                <span>Message</span>
-                <textarea name="body" rows="10" required minlength="10" maxlength="8000" placeholder="Write your message here..."></textarea>
-              </label>
+              ${richArea("Message", "body", "Write your message here...")}
               <div class="field">
                 <span>Photo attachment <span class="fine">(optional · JPG, PNG, WebP · max 2 MB)</span></span>
                 <input id="broadcast-image" type="file" accept="image/jpeg,image/png,image/webp">
@@ -1210,6 +1269,7 @@ async function adminPage(section = "overview") {
       </div>
     `;
 
+    bindRichEditors(root);
     const audienceSelect = $("#broadcast-audience");
     const customWrap = $("#custom-emails-wrap");
     audienceSelect.addEventListener("change", () => {
@@ -1366,7 +1426,7 @@ function decisionModal(title, description, action, reference = false) {
 function createTaskModal() {
   openModal(
     "Create a funded task",
-    `<form id="create-form">${field("Task title", "title", "text", "", 'required minlength="3" maxlength="120"')}${area("Instructions for the member", "description", 'required minlength="10" maxlength="3000"')}<div class="fields-two"><label class="field"><span>Task type</span><select name="type" id="task-type">${Object.entries(
+    `<form id="create-form">${field("Task title", "title", "text", "", 'required minlength="3" maxlength="120"')}${richArea("Instructions for the member", "description", "Write the task instructions here...")}<div class="fields-two"><label class="field"><span>Task type</span><select name="type" id="task-type">${Object.entries(
       kinds,
     )
       .map(([key, k]) => `<option value="${key}">${k.name}</option>`)
@@ -1374,6 +1434,7 @@ function createTaskModal() {
         "",
       )}</select></label><label class="field"><span>Funding source</span><select name="source"><option value="business">Business budget</option><option value="advertiser">Advertiser budget</option></select></label></div>${field("Budget owner / advertiser", "sponsor", "text", "", 'required minlength="2" maxlength="150"')}<div class="fields-two">${field("Pro reward (₦)", "pro_reward", "number", "", 'required min="0" step="0.01"')}${field("Max reward (₦)", "max_reward", "number", "", 'required min="0" step="0.01"')}</div>${field("Allocated task budget (₦)", "budget", "number", "", 'required min="0.01" step="0.01"')}<p class="fine">Zero reward excludes a plan. Allocate only money you have available to fund these rewards.</p><div id="type-fields"></div>${status()}<button class="button full" type="submit">Save draft</button></form>`,
   );
+  bindRichEditors(modal);
   let count = 0;
   function addQuestion() {
     const i = count++;
