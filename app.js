@@ -1478,7 +1478,12 @@ function createTaskModal() {
           '<div id="questions"></div><button id="add-question" class="button secondary small" type="button">＋ Add question</button><br><br>'
         : type === "language"
           ? '<p class="fine">Members will submit language, phrase, English translation and an explanation. You review each submission.</p>'
-          : field(
+          : type === "music"
+            ? '<label class="field"><span>Upload MP3 music file</span><input id="music-file" name="music_file" type="file" accept=".mp3,audio/mpeg" required><small class="fine">MP3 only · maximum 50 MB. The file is stored in your Supabase music bucket.</small></label>' +
+              field("Required listening (seconds)", "seconds", "number", 30, 'required min="10" max="3600" step="1"') +
+              field("Question to answer after listening", "question", "text", "", 'required minlength="5" maxlength="500"') +
+              '<p class="fine">Upload music you own or have permission to use. Members will see an audio player in the task.</p>'
+            : field(
               "Direct HTTPS media file URL",
               "url",
               "url",
@@ -1511,8 +1516,9 @@ function createTaskModal() {
   $("#task-type").onchange = typeFields;
   typeFields();
   bindForm("#create-form", async (data, form) => {
+    const { music_file, ...taskData } = data;
     const payload = {
-      ...data,
+      ...taskData,
       pro_reward: naira(data.pro_reward),
       max_reward: naira(data.max_reward),
       budget: naira(data.budget),
@@ -1530,6 +1536,28 @@ function createTaskModal() {
     }
     if (["music", "video"].includes(data.type))
       payload.seconds = Number(data.seconds);
+    if (data.type === "music") {
+      const file = music_file;
+      if (!(file instanceof File) || !file.size) throw new Error("Choose an MP3 file to upload.");
+      if (!/\\.mp3$/i.test(file.name) || (file.type && !["audio/mpeg", "audio/mp3", "application/octet-stream"].includes(file.type)))
+        throw new Error("Choose a valid MP3 audio file.");
+      if (file.size > 50 * 1024 * 1024) throw new Error("MP3 files must be 50 MB or smaller.");
+      const upload = await api("/admin/music-upload-url", {
+        filename: file.name,
+        contentType: file.type || "audio/mpeg",
+        size: file.size,
+      });
+      const uploaded = await fetch(upload.uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type || "audio/mpeg" },
+        body: file,
+      });
+      if (!uploaded.ok) {
+        const detail = await uploaded.json().catch(() => ({}));
+        throw new Error(detail.message || detail.error || "MP3 upload failed. Check the Supabase music bucket settings.");
+      }
+      payload.media_path = upload.path;
+    }
     await api("/admin/tasks", payload);
     closeModal();
     toast("Draft saved. Publish it when you’re ready.");
